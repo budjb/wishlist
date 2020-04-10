@@ -1,0 +1,13 @@
+html, body, div#root {
+  height: 100%;
+}
+
+body {
+  background: url("/back.jpg");
+}
+
+.table td.fit,
+.table th.fit {
+  white-space: nowrap;
+  width: 1%;
+}

@@ -1,0 +1,45 @@
+div.main-content {
+  max-width: 800px;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.95);
+}
+
+.edit-button {
+  color: #999;
+  cursor: pointer;
+}
+
+.edit-button:hover {
+  color: black;
+}
+
+.edit-row-button {
+  cursor: pointer;
+}
+
+.edit-row-button.edit-confirm {
+  color: #5cb85c;
+}
+
+.edit-row-button.edit-cancel {
+ color: #292b2c;
+}
+
+.add-item-button {
+  cursor: pointer;
+  color: #292b2c;
+}
+
+.add-item-button:hover {
+  color: #5cb85c;
+}
+
+.profile-button img {
+  border-radius: 100%;
+  cursor: pointer;
+  height: 2.5rem;
+}
+
+.profile-button.dropdown-toggle::after {
+  content: none;
+}
