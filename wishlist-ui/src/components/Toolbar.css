@@ -1,0 +1,8 @@
+.toolbar-home-link {
+  color: black;
+}
+
+.toolbar-home-link:hover {
+  color: inherit;
+  text-decoration: none;
+}

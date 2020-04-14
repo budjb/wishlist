@@ -1,0 +1,11 @@
+.edit-wishlist-title, .edit-wishlist-title:focus {
+  font-size: 2.5rem;
+  max-width: 300px;
+  border: 0;
+  background: none;
+  margin: 0;
+  padding: 0;
+  outline: none!important;
+  height: auto;
+  line-height: 1.2;
+}

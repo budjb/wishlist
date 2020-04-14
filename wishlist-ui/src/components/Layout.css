@@ -1,0 +1,23 @@
+div.main-container {
+  height: 100%;
+  max-width: 800px;
+  width: 100%;
+  margin: 0 auto;
+  background: white;
+}
+
+main {
+  position: relative;
+}
+
+.fork-me {
+    width: 3rem;
+    height: 3rem;
+    background: linear-gradient(to bottom right, #fff 0%, #fff 50%, black 50%, black 100%);
+    color: white;
+    cursor: pointer;
+}
+
+.fork-me:hover {
+  color: white;
+}

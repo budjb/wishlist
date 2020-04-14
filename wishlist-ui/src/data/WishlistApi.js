@@ -1,75 +1,139 @@
-import React, { createContext, useState, useEffect } from 'react';
-import { v4 as uuidv4 } from 'uuid';
+import React, { createContext, useEffect, useState, useContext } from 'react';
+import {v4 as uuidv4} from 'uuid';
+import { Auth0Context } from '../Auth0';
+
+import _ from 'lodash';
+
+const localStorageKey = "__wishlist_items";
 
 export const WishlistApiContext = createContext();
 
-const mockItems = [
-  {
-    id: "e7751fa7-e1ab-478f-bf6f-71076b1a1eba",
-    description: "foo",
-    price: 123.45
-  },
-  {
-    id: "9e331644-93a3-4f3c-9868-3337a5effc5f",
-    description: "Gift Cards (anywhere really)",
-    price: "Any"
-  }
-]
-
-export default ({ children }) => {
-  const [items, setItems] = useState([]);
+export const WishlistApiProvider = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true);
+  const [lists, setLists] = useState([]);
 
-  useEffect(() => {
-    setItems(mockItems);
-    setIsLoading(false);
-  }, []);
+  const auth0Context = useContext(Auth0Context);
 
-  /**
-   * TODO: actually call the API
-   * 
-   * @param {*} id 
-   */
-  const removeItem = id => {
-    setItems(items.filter(it => it.id !== id));
+  const pushLocalStorage = () => {
+    localStorage.setItem(localStorageKey, JSON.stringify(lists));
+    setIsLoading(true);
   };
 
-  const updateItem = (id, description, url, price) => {
-    const item = items.find(it => it.id === id);
+  const addList = name => {
+    lists.push({
+      id: uuidv4(),
+      name,
+      owner: auth0Context.user.email
+    });
+    pushLocalStorage();
+  };
 
-    if (!item) {
-      console.error(`Item with id ${id} not found`);
+  const deleteList = id => {
+    _.remove(lists, it => it.id === id)
+    pushLocalStorage();
+  };
+
+  const getList = id => {
+    return lists.find(it => it.id === id);
+  };
+
+  const removeItem = (listId, itemId) => {
+    const list = getList(listId);
+
+    if (!list) {
       return;
     }
 
-    item.description = description;
-    item.url = url;
-    item.price = price;
+    const items = list.items;
 
-    // Force re-render
-    setItems([...items]);
-  };
-
-  const addItem = (description, url, price) => {
-    const newItem = {
-      id: uuidv4(),
-      description,
-      url,
-      price
+    if (!items) {
+      return;
     }
-    setItems([...items, newItem])
+
+    _.remove(items, it => it.id === itemId);
+    pushLocalStorage();
   };
 
-  const providerValue = {
-    items,
-    isLoading,
-    removeItem,
-    updateItem,
-    addItem
+  const addItem = (listId, item) => {
+    const list = getList(listId);
+
+    if (!list) {
+      return;
+    }
+
+    if (!list.items) {
+      list.items = [];
+    }
+
+    list.items.push(item);
+
+    pushLocalStorage();
   };
+
+  const getItems = (listId) => {
+    const list = getList(listId);
+
+    if (!list) {
+      return [];
+    }
+
+    return list.items || [];
+  };
+
+  const updateItem = (listId, updated) => {
+    const list = getList(listId);
+
+    if (!list) {
+      return;
+    }
+
+    const items = list.items;
+
+    if (!items) {
+      return;
+    }
+
+    const previous = items.find(it => it.id === updated.id);
+
+    if (!previous) {
+      return;
+    }
+
+    previous.description = updated.description;
+    previous.url = updated.url;
+    previous.price = updated.price;
+
+    pushLocalStorage();
+  };
+
+  const renameList = (id, name) => {
+    const list = getList(id);
+    list.name = name;
+    pushLocalStorage();
+  };
+
+  useEffect(() => {
+    if (isLoading) {
+      if (localStorage.getItem(localStorageKey)) {
+        setLists(JSON.parse(localStorage.getItem(localStorageKey)));
+      }
+      setIsLoading(false);
+    }
+  }, [isLoading]);
 
   return (
-    <WishlistApiContext.Provider value={providerValue}>
+    <WishlistApiContext.Provider value={{
+      isLoading,
+      lists,
+      addList,
+      deleteList,
+      getList,
+      getItems,
+      addItem,
+      removeItem,
+      updateItem,
+      renameList
+    }}>
       {children}
     </WishlistApiContext.Provider>
   )

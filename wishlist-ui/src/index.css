@@ -11,3 +11,19 @@ body {
   white-space: nowrap;
   width: 1%;
 }
+
+.cursor-pointer {
+  cursor: pointer;
+}
+
+.text-muted-hover {
+  color: #6c757d;
+}
+
+.text-muted-hover:hover {
+  color: black;
+}
+
+.divider-bottom {
+  border-bottom: 1px solid #999;
+}
