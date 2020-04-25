@@ -2,8 +2,9 @@ import React, { useState, useContext, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Dropdown, Jumbotron, Button, Table, Modal, Alert, Form, Breadcrumb } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlus, faEllipsisV } from '@fortawesome/free-solid-svg-icons';
+import { faPlus, faEllipsisV, faSort } from '@fortawesome/free-solid-svg-icons';
 import { faFrown } from '@fortawesome/free-regular-svg-icons';
+import {sortableContainer, sortableElement, sortableHandle} from 'react-sortable-hoc';
 import * as ViewContext from './ViewContext';
 
 import DeleteListModal from '../../components/DeleteListModal';
@@ -11,6 +12,18 @@ import EditListModal from '../../components/EditListModal';
 import Loading from '../../components/Loading';
 
 import './View.css';
+
+const SortableTable = sortableContainer(({ children }) => <Table borderless>{children}</Table>);
+const SortableItemRow = sortableElement(({ idx, item, isOwner }) => {
+  return <ItemRow key={idx} index={idx} item={item} isOwner={isOwner}/>;
+});
+const SortableDragHandle = sortableHandle(() => {
+  return (
+    <span className="pr-2 cursor-move text-muted-hover">
+      <FontAwesomeIcon icon={faSort}/>
+    </span>
+  );
+});
 
 const currencyFormatter = new Intl.NumberFormat('en-US', {
   style: 'currency',
@@ -212,8 +225,11 @@ const ItemRow = ({ item, isOwner }) => {
   const description = itemText();
 
   return (
-    <tr>
-      <td>{description}</td>
+    <tr className="bg-white">
+      <td>
+        { isOwner && <SortableDragHandle/> }
+        {description}
+      </td>
       <td className="text-right">{currencyOrString(item.price)}</td>
       <td className="fit">{ isOwner && <ItemActions item={item} /> }</td>
     </tr>
@@ -291,7 +307,16 @@ const List = () => {
     return <EmptyList/>;
   }
 
-  const rows = context.items.map((it, idx) => <ItemRow key={idx} item={it} isOwner={isOwner}/>);
+  const rows = context.items.map((it, idx) => {
+    return <SortableItemRow key={idx} index={idx} item={it} isOwner={isOwner}/>;
+  });
+
+  const handleSortStart = ({ node }) => {
+    const tds = document.getElementsByClassName("SortableHelper")[0].childNodes;
+    node.childNodes.forEach(
+      (node, idx) => tds[idx].style.width = `${node.offsetWidth}px`
+    );
+  };
 
   return (
     <>
@@ -307,9 +332,9 @@ const List = () => {
         { isOwner && <ListActions/> }
       </header>
 
-      <Table>
+      <SortableTable lockAxis="y" onSortStart={handleSortStart} helperClass="SortableHelper" useDragHandle>
         <thead>
-          <tr>
+          <tr className="bg-secondary text-white">
             <th>Description</th>
             <th className="text-right">Price</th>
             <th className="fit"/>
@@ -318,7 +343,7 @@ const List = () => {
         <tbody>
           {rows}
         </tbody>
-      </Table>
+      </SortableTable>
     </> 
   )
 };

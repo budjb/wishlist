@@ -1,8 +1,8 @@
 import React, { createContext, useEffect, useState, useContext } from 'react';
 import {v4 as uuidv4} from 'uuid';
 import { Auth0Context } from '../Auth0';
-
 import _ from 'lodash';
+import config from '../config.json';
 
 const localStorageKey = "__wishlist_items";
 
@@ -137,4 +137,27 @@ export const WishlistApiProvider = ({ children }) => {
       {children}
     </WishlistApiContext.Provider>
   )
+};
+
+export const getLists = (token) => {
+  return fetch(
+    `${config.apiBaseUrl}/wishlists`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    }
+  ).then(res => res.json());
+}
+
+export const createList = (token, name) => {
+  return fetch(
+    `${config.apiBaseUrl}/wishlists`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({name: name})
+    }
+  ).then(res => res.json());
 };

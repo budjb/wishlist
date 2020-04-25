@@ -9,3 +9,13 @@
   height: auto;
   line-height: 1.2;
 }
+
+body > tr {
+  display: table !important;
+}
+
+td {
+  padding: .75rem;
+  line-height: 1.428571429;
+  vertical-align: top;
+}

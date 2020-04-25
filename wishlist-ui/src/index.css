@@ -16,6 +16,10 @@ body {
   cursor: pointer;
 }
 
+.cursor-move {
+  cursor: move;
+}
+
 .text-muted-hover {
   color: #6c757d;
 }
