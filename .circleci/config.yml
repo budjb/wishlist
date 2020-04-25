@@ -48,6 +48,7 @@ workflows:
   release:
     jobs:
       - aws_auth:
+          context: aws-personal
           filters:
             branches:
               only:
