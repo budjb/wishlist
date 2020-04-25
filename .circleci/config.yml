@@ -42,7 +42,8 @@ jobs:
           at: ~/.aws
       - attach_workspace:
           at: .
-      - terraform
+      - terraform:
+          path: terraform
 
 workflows:
   release:
