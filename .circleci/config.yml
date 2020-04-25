@@ -10,7 +10,7 @@ commands:
     steps:
       - checkout
       - run: terraform init -input=false -backend-config="bucket=wishlist-terraform-state" -backend-config="key=terraform.tfstate" << parameters.path >>
-      - run: terraform plan -input=false -var "stage=<< parameters.stage >>" -out terraform.plan << parameters.path >>
+      - run: terraform plan -input=false -out terraform.plan << parameters.path >>
       - run: terraform apply terraform.plan
 
 orbs:
@@ -42,8 +42,7 @@ jobs:
           at: ~/.aws
       - attach_workspace:
           at: .
-      - terraform:
-          path: terraform
+      - terraform
 
 workflows:
   release:
