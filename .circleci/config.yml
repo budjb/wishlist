@@ -1,0 +1,61 @@
+version: 2.1
+
+commands:
+  terraform:
+    description: Plan and apply a Terraform configuration
+    parameters:
+      path:
+        type: string
+        default: terraform
+    steps:
+      - checkout
+      - run: terraform init -input=false -backend-config="bucket=wishlist-terraform-state" -backend-config="key=terraform.tfstate" << parameters.path >>
+      - run: terraform plan -input=false -var "stage=<< parameters.stage >>" -out terraform.plan << parameters.path >>
+      - run: terraform apply terraform.plan
+
+orbs:
+  aws-cli: circleci/aws-cli@0.1.13
+
+jobs:
+  aws_auth:
+    executor: aws-cli/default
+    environment:
+      AWS_REGION: us-east-1
+    steps:
+      - checkout
+      - aws-cli/install
+      - aws-cli/configure:
+          aws-access-key-id: AWS_ACCESS_KEY_ID
+          aws-secret-access-key: AWS_SECRET_ACCESS_KEY
+          aws-region: AWS_REGION
+      - persist_to_workspace:
+          root: ~/.aws
+          paths:
+            - "*"
+
+  terraform:
+    docker:
+      - image: hashicorp/terraform:0.12.24
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ~/.aws
+      - attach_workspace:
+          at: .
+      - terraform
+
+workflows:
+  release:
+    jobs:
+      - aws_auth:
+          filters:
+            branches:
+              only:
+                - master
+      - terraform:
+          requires:
+            - aws_auth
+          filters:
+            branches:
+              only:
+                - master
