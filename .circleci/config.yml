@@ -17,6 +17,26 @@ orbs:
   aws-cli: circleci/aws-cli@0.1.13
 
 jobs:
+  build_api:
+    docker:
+      - image: circleci/node:12
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - wishlist-api-dependencies-{{ checksum "wishlist-api/package.json" }}
+            - wishlist-api-dependencies-
+      - run: yarn install
+      - save_cache:
+          paths:
+            - node_modules
+          key: wishlist-api-dependencies-{{ checksum "wishlist-api/package.json" }}
+      - run: yarn format-check
+      - run: yarn package
+      - persist_to_workspace:
+          root: wishlist-api
+          paths: dist/
+
   aws_auth:
     executor: aws-cli/default
     environment:
@@ -41,7 +61,7 @@ jobs:
       - attach_workspace:
           at: ~/.aws
       - attach_workspace:
-          at: .
+          at: wishlist-api
       - terraform
 
 workflows:
@@ -53,9 +73,15 @@ workflows:
             branches:
               only:
                 - master
+      - build_api:
+          filters:
+            branches:
+              only:
+                - master
       - terraform:
           requires:
             - aws_auth
+            - build_api
           filters:
             branches:
               only:

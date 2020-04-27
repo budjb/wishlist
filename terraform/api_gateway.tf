@@ -73,7 +73,6 @@ resource "aws_api_gateway_base_path_mapping" "basepath" {
 }
 
 resource "aws_route53_record" "custom_domain_record" {
-  count   = var.enable_custom_domain ? 1 : 0
   zone_id = data.aws_route53_zone.budjb_com_zone.zone_id
   name    = "api.wishlist.budjb.com"
   type    = "A"
