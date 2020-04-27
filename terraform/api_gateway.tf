@@ -34,7 +34,7 @@ resource "aws_iam_role_policy" "api_gateway_lambda_policy" {
 }
 
 data "template_file" "api_gateway_spec" {
-  template = var.swagger_template
+  template = file("${path.module}/openapi.yml")
 
   vars = {
     lambda_arn = aws_lambda_function.wishlist_api.arn

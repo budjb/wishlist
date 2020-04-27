@@ -45,7 +45,7 @@ resource "aws_iam_role_policy" "lambda_policy" {
 
 resource "aws_lambda_function" "wishlist_api" {
   function_name                  = "wishlist-api"
-  filename                       = file(local.lambda_dist_path)
+  filename                       = local.lambda_dist_path
   source_code_hash               = filebase64sha256(local.lambda_dist_path)
   role                           = aws_iam_role.wishlist_api_role.arn
   handler                        = "lambda.handler"
@@ -64,7 +64,7 @@ resource "aws_lambda_function" "wishlist_api" {
 }
 
 resource "aws_lambda_alias" "lambda_alias" {
-  name             = var.stage
+  name             = "wishlist-api"
   function_name    = aws_lambda_function.wishlist_api.arn
   function_version = aws_lambda_function.wishlist_api.version
 }
