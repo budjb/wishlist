@@ -26,13 +26,19 @@ jobs:
           keys:
             - wishlist-api-dependencies-{{ checksum "wishlist-api/package.json" }}
             - wishlist-api-dependencies-
-      - run: yarn install
+      - run:
+          command: yarn install
+          working_directory: wishlist-api
       - save_cache:
           paths:
             - node_modules
           key: wishlist-api-dependencies-{{ checksum "wishlist-api/package.json" }}
-      - run: yarn format-check
-      - run: yarn package
+      - run:
+          command: yarn format-check
+          working_directory: wishlist-api
+      - run:
+          command: yarn package
+          working_directory: wishlist-api
       - persist_to_workspace:
           root: wishlist-api
           paths: dist/
