@@ -1,15 +1,14 @@
 import React, { useState, useContext, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { Dropdown, Jumbotron, Button, Table, Modal, Alert, Form, Breadcrumb } from 'react-bootstrap';
+import { useParams } from 'react-router-dom';
+import { Dropdown, Jumbotron, Button, Table, Modal, Alert, Form, Toast } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlus, faEllipsisV, faSort } from '@fortawesome/free-solid-svg-icons';
-import { faFrown } from '@fortawesome/free-regular-svg-icons';
+import { faPlus, faEllipsisV, faSort, faShareAlt } from '@fortawesome/free-solid-svg-icons';
 import {sortableContainer, sortableElement, sortableHandle} from 'react-sortable-hoc';
-import * as ViewContext from './ViewContext';
+
+import { ListContext, ListProvider } from '../../data/ListContext';
 
 import DeleteListModal from '../../components/DeleteListModal';
 import EditListModal from '../../components/EditListModal';
-import Loading from '../../components/Loading';
 
 import './View.css';
 
@@ -32,7 +31,7 @@ const currencyFormatter = new Intl.NumberFormat('en-US', {
 });
 
 const currencyOrString = s => {
-  if (s === '') {
+  if (s === null || s === '') {
     return <em>N/A</em>;
   }
   
@@ -43,11 +42,24 @@ const currencyOrString = s => {
 };
 
 const ConfirmRemoveModal = ({ item, isShown, close }) => {
-  const context = useContext(ViewContext.Context);
+  const [busy, setBusy] = useState(false);
+  const [errorMessage, setErrorMessage] = useState();
+  const context = useContext(ListContext);
 
   const removeItem = () => {
-    context.removeItem(item.id);
-    close();
+    if (busy) {
+      return;
+    }
+
+    setBusy(true);
+    context.removeItem(item.id).then(() => {
+      setBusy(false);
+      setErrorMessage(undefined);
+      close();
+    }).catch(() => {
+      setBusy(false);
+      setErrorMessage('An unexpected error prevented the item from being removed from the list.');
+    });
   };
 
   return (
@@ -56,6 +68,7 @@ const ConfirmRemoveModal = ({ item, isShown, close }) => {
         <Modal.Title>Confirm</Modal.Title>
       </Modal.Header>
       <Modal.Body>
+        { errorMessage && <Alert variant='danger'>{errorMessage}</Alert>}
         <p>Are you sure you want to remove this item from the wishlist?</p>
         <Alert variant="secondary">{item.description}</Alert>
       </Modal.Body>
@@ -63,7 +76,7 @@ const ConfirmRemoveModal = ({ item, isShown, close }) => {
         <Button variant="secondary" onClick={close}>
           Cancel
         </Button>
-        <Button variant="primary" onClick={removeItem}>
+        <Button variant="primary" onClick={removeItem} disabled={busy}>
           Remove Item
         </Button>
       </Modal.Footer>
@@ -72,8 +85,10 @@ const ConfirmRemoveModal = ({ item, isShown, close }) => {
 };
 
 const AddItemModal = ({ isShown, close }) => {
-  const context = useContext(ViewContext.Context);
   const [validated, setValidated] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [errorMessage, setErrorMessage] = useState();
+  const context = useContext(ListContext);
 
   let descriptionRef, urlRef, priceRef;
 
@@ -86,8 +101,19 @@ const AddItemModal = ({ isShown, close }) => {
     if (form.checkValidity() === false) {
       setValidated(true);
     } else {
-      context.addItem(descriptionRef.value, urlRef.value, priceRef.value);
-      close();
+      setBusy(true);
+      context.addItem({
+        description: descriptionRef.value,
+        url: urlRef.value,
+        price: priceRef.value
+      }).then(() => {
+        setBusy(false);
+        setErrorMessage(undefined);
+        close();
+      }).catch(() => {
+        setBusy(false);
+        setErrorMessage('An unexpected error prevented the item from being added to the list.')
+      });
     }
   };
 
@@ -98,6 +124,7 @@ const AddItemModal = ({ isShown, close }) => {
           <Modal.Title>Add Item</Modal.Title>
         </Modal.Header>
         <Modal.Body>
+          { errorMessage && <Alert variant='danger'>{errorMessage}</Alert>}
           <Form.Group>
             <Form.Label>Description</Form.Label>
             <Form.Control ref={ref => descriptionRef = ref} type="text" placeholder="Item description..." required/>
@@ -119,7 +146,7 @@ const AddItemModal = ({ isShown, close }) => {
           <Button variant="secondary" onClick={close}>
             Cancel
           </Button>
-          <Button type="submit" variant="primary">
+          <Button type="submit" variant="primary" disabled={busy}>
             Save
           </Button>
         </Modal.Footer>
@@ -129,8 +156,10 @@ const AddItemModal = ({ isShown, close }) => {
 };
 
 const EditItemModal = ({ item, isShown, close }) => {
-  const context = useContext(ViewContext.Context);
+  const context = useContext(ListContext);
   const [validated, setValidated] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [errorMessage, setErrorMessage] = useState();
 
   let descriptionRef, urlRef, priceRef;
 
@@ -143,8 +172,19 @@ const EditItemModal = ({ item, isShown, close }) => {
     if (form.checkValidity() === false) {
       setValidated(true);
     } else {
-      context.updateItem(item.id, descriptionRef.value, urlRef.value, priceRef.value);
-      close();
+      setBusy(true);
+      context.updateItem(item.id, {
+        description: descriptionRef.value,
+        url: urlRef.value,
+        price: priceRef.value
+      }).then(() => {
+        setBusy(false);
+        setErrorMessage(undefined);
+        close();
+      }).catch(() => {
+        setBusy(false);
+        setErrorMessage('An unexpected error prevented the item from being added to the list.')
+      });
     }
   };
 
@@ -155,6 +195,7 @@ const EditItemModal = ({ item, isShown, close }) => {
           <Modal.Title>Edit Item</Modal.Title>
         </Modal.Header>
         <Modal.Body>
+          { errorMessage && <Alert variant='danger'>{errorMessage}</Alert> }
           <Form.Group>
             <Form.Label>Description</Form.Label>
             <Form.Control ref={ref => descriptionRef = ref} type="text" placeholder="Item description..."
@@ -179,7 +220,7 @@ const EditItemModal = ({ item, isShown, close }) => {
           <Button variant="secondary" onClick={close}>
             Cancel
           </Button>
-          <Button type="submit" variant="primary">
+          <Button type="submit" variant="primary" disabled={busy}>
             Save
           </Button>
         </Modal.Footer>
@@ -236,19 +277,30 @@ const ItemRow = ({ item, isOwner }) => {
   );
 };
 
-const NotFound = () => {
-  return (
-    <div className="text-center">
-      <p style={{fontSize: "10rem"}}><FontAwesomeIcon icon={faFrown}/></p>
-      <h3>Wish List Not Found</h3>
-    </div>
-  );
-};
-
-const EmptyList = () => {
+const EmptyList = ({ isOwner }) => {
   const [isAddModalShown, setIsAddModalShown] = useState(false);
+  const context = useContext(ListContext);
 
+  if (!isOwner) {
+    return (
+      <Jumbotron>
+        <h1>Wish list is empty!</h1>
+        <p className="m0">
+          It looks like whoever created this wish list has all they could ever want! That,
+          or they just haven't added anything to it. Probably the latter, but if not, maybe
+          you should send them <em>your</em> wish list!
+        </p>
+      </Jumbotron>
+    )
+  }
   return (
+    <>
+    <header className="d-flex flex-row align-items-center">
+      <h2 className="flex-grow-1">
+        {context.list.name}
+      </h2>
+      { isOwner && <ListActions/> }
+    </header>
     <Jumbotron>
       <AddItemModal isShown={isAddModalShown} close={() => setIsAddModalShown(false)}/>
       <h1>Get Started</h1>
@@ -257,19 +309,49 @@ const EmptyList = () => {
       </p>
       <Button onClick={() => setIsAddModalShown(true)}>Add An Item</Button>
     </Jumbotron>
+    </>
   );
 };
 
-const ListActions = () => {
+const ListActions = ({ isOwner}) => {
   const [isDeleteModalShown, setIsDeleteModalShown] = useState(false);
   const [isEditModalShown, setIsEditModalShown] = useState(false);
   const [isAddItemModalShown, setIsAddItemModalShown] = useState(false);
-  const context = useContext(ViewContext.Context);
+  const [isCopiedToastShown, setIsCopiedToastShown] = useState(false);
+
+  const context = useContext(ListContext);
+
   const list = context.list;
+
+  const copyUrlToClipboard = () => {
+      var dummy = document.createElement("input");
+      document.body.appendChild(dummy);
+      dummy.setAttribute('value', window.location.href);
+      dummy.select();
+      document.execCommand("copy");
+      document.body.removeChild(dummy);
+      setIsCopiedToastShown(true);
+  };
+
+  const share = (
+    <>
+      <Toast onClose={() => setIsCopiedToastShown(false)} show={isCopiedToastShown} delay={2000} autohide>
+        <Toast.Body>Link copied to clipboard!</Toast.Body>
+      </Toast>
+      <div className="cursor-pointer px-2 text-muted-hover" onClick={copyUrlToClipboard}>
+        <FontAwesomeIcon icon={faShareAlt}/>
+     </div>
+    </>
+  );
+
+  if (!isOwner) {
+    return share;
+  }
 
   return (
     <>
-      <EditListModal list={list} isShown={isEditModalShown} close={() => setIsEditModalShown(false)} saveList={context.renameList}/>
+      {share}
+      <EditListModal list={list} isShown={isEditModalShown} close={() => setIsEditModalShown(false)} updateList={context.updateList}/>
       <DeleteListModal list={list} isShown={isDeleteModalShown} close={() => setIsDeleteModalShown(false)} deleteList={context.deleteList}/>
       <AddItemModal isShown={isAddItemModalShown} close={() => setIsAddItemModalShown(false)}/>
       <div className="cursor-pointer px-2 text-muted-hover" onClick={() => setIsAddItemModalShown(true)}><FontAwesomeIcon icon={faPlus}/></div>
@@ -289,8 +371,8 @@ const ListActions = () => {
 const List = () => {
   const [isOwner, setIsOwner] = useState(false);
 
-  const context = useContext(ViewContext.Context);
-  const isLoading = context.isLoading;
+  const context = useContext(ListContext);
+  const isLoading = context.loading;
   const isCurrentUserOwner = context.isCurrentUserOwner();
 
   useEffect(() => {
@@ -299,12 +381,8 @@ const List = () => {
     }
   }, [isLoading, isCurrentUserOwner]);
 
-  if (context.isLoading) {
-    return <Loading/>;
-  } else if (context.notFound) {
-    return <NotFound/>;
-  } else if (!context.items.length) {
-    return <EmptyList/>;
+  if (!context.items.length) {
+    return <EmptyList isOwner={isOwner}/>;
   }
 
   const rows = context.items.map((it, idx) => {
@@ -320,16 +398,11 @@ const List = () => {
 
   return (
     <>
-      <Breadcrumb>
-        <Breadcrumb.Item linkAs={Link} linkProps={{to: "/"}}>Home</Breadcrumb.Item>
-        <Breadcrumb.Item active>{context.list.name}</Breadcrumb.Item>
-      </Breadcrumb>
-
       <header className="d-flex flex-row align-items-center">
         <h2 className="flex-grow-1">
           {context.list.name}
         </h2>
-        { isOwner && <ListActions/> }
+        <ListActions isOwner={isOwner}/>
       </header>
 
       <SortableTable lockAxis="y" onSortStart={handleSortStart} helperClass="SortableHelper" useDragHandle>
@@ -350,8 +423,8 @@ const List = () => {
 
 export default () => {
   return (
-    <ViewContext.Provider listId={useParams().id}>
+    <ListProvider wishlistId={useParams().id}>
       <List/>
-    </ViewContext.Provider>
+    </ListProvider>
   );
 }

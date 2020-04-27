@@ -1,0 +1,21 @@
+openapi: "3.0.0"
+info:
+  version: v1
+  title: Wishlist
+  description: Wishlist API
+paths:
+  /{proxy+}:
+    options:
+      responses: {}
+      x-amazon-apigateway-integration:
+        type: "aws_proxy"
+        credentials: "${role_arn}"
+        uri: "${lambda_arn}"
+        httpMethod: "POST"
+    x-amazon-apigateway-any-method:
+      responses: {}
+      x-amazon-apigateway-integration:
+        type: "aws_proxy"
+        credentials: "${role_arn}"
+        uri: "${lambda_arn}"
+        httpMethod: "POST"

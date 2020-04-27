@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect, createContext } from 'react';
+import React, { useState, useContext } from 'react';
 import { Jumbotron, Button, Dropdown, ListGroup } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEllipsisV, faPlus } from '@fortawesome/free-solid-svg-icons';
@@ -7,15 +7,10 @@ import AddListModal from '../../components/AddListModal';
 import DeleteListModal from '../../components/DeleteListModal';
 import EditListModal from '../../components/EditListModal';
 
-import Loading from '../../components/Loading';
 import { Link } from 'react-router-dom';
-
-import { WishlistApiContext, getLists, createList } from '../../data/WishlistApi';
-import { Auth0Context } from '../../Auth0';
+import { ListsContext, ListsProvider } from '../../data/ListsContext';
 
 import './Index.css';
-
-const ListsContext = createContext();
 
 const GettingStarted = () => {
   const [isAddModalShown, setIsAddModalShown] = useState(false);
@@ -35,11 +30,11 @@ const GettingStarted = () => {
 
 const Actions = () => {
   const [isAddModalShown, setIsAddModalShown] = useState(false);
-  const context = useContext(WishlistApiContext);
+  const context = useContext(ListsContext);
 
   return (
     <>
-      <AddListModal isShown={isAddModalShown} close={() => setIsAddModalShown(false)} addList={context.addList} />
+      <AddListModal isShown={isAddModalShown} close={() => setIsAddModalShown(false)} addList={context.createList} />
       <div className="cursor-pointer px-2 text-muted-hover" onClick={() => setIsAddModalShown(true)}>
         <FontAwesomeIcon icon={faPlus} />
       </div>
@@ -50,11 +45,11 @@ const Actions = () => {
 const ListActions = ({ list }) => {
   const [isDeleteModalShown, setIsDeleteModalShown] = useState(false);
   const [isEditModalShown, setIsEditModalShown] = useState(false);
-  const context = useContext(WishlistApiContext);
+  const context = useContext(ListsContext);
 
   return (
     <>
-      <EditListModal list={list} isShown={isEditModalShown} close={() => setIsEditModalShown(false)} saveList={context.renameList} />
+      <EditListModal list={list} isShown={isEditModalShown} close={() => setIsEditModalShown(false)} updateList={context.updateList} />
       <DeleteListModal list={list} isShown={isDeleteModalShown} close={() => setIsDeleteModalShown(false)} deleteList={context.deleteList} />
       <Dropdown>
         <Dropdown.Toggle as="div" bsPrefix="actions-dropdown" className="cursor-pointer text-muted-hover px-2">
@@ -69,7 +64,9 @@ const ListActions = ({ list }) => {
   )
 };
 
-const List = ({ lists }) => {
+const List = () => {
+  const { lists } = useContext(ListsContext);
+
   const rows = lists.map((it, i) => {
     return (
       <ListGroup.Item key={i} className="d-flex flex-row align-items-center">
@@ -95,48 +92,13 @@ const List = ({ lists }) => {
 };
 
 export default () => {
-  const [lists, setLists] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  const auth0Context = useContext(Auth0Context);
-
-  const _getLists = () => {
-    return auth0Context.getTokenSilently()
-      .then(token => getLists(token))
-};
-
-  const _createList = name => {
-    return auth0Context.getTokenSilently()
-      .then(token => createList(token, name))
-      .catch(err => console.error(`Unable to load wishlists: ${err}`));
-  };
-
-  useEffect(() => {
-    if (!auth0Context.loading && auth0Context.isAuthenticated) {
-      _getLists().then(res => setLists(res))
-        .then(() => setLoading(false))
-        .catch(err => console.error(`Unable to load wishlists: ${err}`));
-    }
-  }, [auth0Context, auth0Context.loading, auth0Context.isAuthenticated]);
-
-  if (loading) {
-    return <Loading />;
-  }
-
-  const contextValue = {
-    lists,
-    createList: _createList
-  };
-
-  const content = lists.length ? (
-    <List />
-  ) : (
-    <GettingStarted />
-  );
-
   return (
-    <ListsContext.Provider value={contextValue}>
-      {content}
-    </ListsContext.Provider>
+    <ListsProvider>
+      <ListsContext.Consumer>
+        {({ lists }) => {
+          return lists.length ? <List /> : <GettingStarted/>
+        }}
+      </ListsContext.Consumer>
+    </ListsProvider>
   );
 };

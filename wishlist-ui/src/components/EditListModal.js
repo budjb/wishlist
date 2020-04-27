@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
-import { Modal, Form, Button } from 'react-bootstrap';
+import { Modal, Form, Button, Alert } from 'react-bootstrap';
 
-export default ({ list, isShown, close, saveList }) => {
+export default ({ list, isShown, close, updateList }) => {
   const [validated, setValidated] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [errorMessage, setErrorMessage] = useState();
 
   let nameRef;
 
@@ -14,12 +16,20 @@ export default ({ list, isShown, close, saveList }) => {
 
     if (form.checkValidity() === false) {
       setValidated(true);
-    } else {
-      if (list.name !== nameRef.value) {
-        saveList(list.id, nameRef.value);
-        // context.renameList(context.list.id, nameRef.value);
-      }
+    } else if (list.name === nameRef.value) {
       close();
+    } else {
+      setBusy(true);
+      updateList(list.id, {name: nameRef.value})
+        .then(() => {
+          setBusy(false);
+          setErrorMessage(undefined);
+          close();
+        })
+        .catch(() => {
+          setBusy(false);
+          setErrorMessage('An unexpected error prevented the list from being saved.');
+        });
     }
   };
 
@@ -30,6 +40,7 @@ export default ({ list, isShown, close, saveList }) => {
           <Modal.Title>Edit Title</Modal.Title>
         </Modal.Header>
         <Modal.Body>
+          { errorMessage && <Alert variant='danger'>{errorMessage}</Alert>}
           <Form.Group>
             <Form.Label>Name</Form.Label>
             <Form.Control ref={ref => nameRef = ref} type="text" placeholder="List name"
@@ -43,7 +54,7 @@ export default ({ list, isShown, close, saveList }) => {
           <Button variant="secondary" onClick={close}>
             Cancel
           </Button>
-          <Button type="submit" variant="primary">
+          <Button type="submit" variant="primary" disabled={busy}>
             Save
           </Button>
         </Modal.Footer>

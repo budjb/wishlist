@@ -15,9 +15,15 @@
     "uuid": "^7.0.3"
   },
   "scripts": {
-    "start": "nodemon src/index.js"
+    "start": "nodemon src/index.js",
+    "build": "rm -rf build/ && mkdir build && cp -R src/* build/ && yarn install --production --modules-folder build/node_modules",
+    "package": "rm -rf dist/ && mkdir dist && yarn build && (cd build && zip -qr9 ../dist/lambda.zip .)",
+    "clean": "rm -rf dist/ build/",
+    "format": "prettier --write \"**/*.+(js|jsx|json|css)\"",
+    "format-check": "prettier --check \"**/*.+(js|jsx|json|css)\""
   },
   "devDependencies": {
-    "nodemon": "^2.0.3"
+    "nodemon": "^2.0.3",
+    "prettier": "^2.0.5"
   }
 }

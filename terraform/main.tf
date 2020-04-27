@@ -1,4 +1,3 @@
-# Backend
 terraform {
   backend "s3" {
     region  = "us-east-1"
@@ -6,30 +5,16 @@ terraform {
   }
 }
 
-# Providers
 provider "aws" {
-  region  = "us-east-1"
+  region = "us-east-1"
 }
 
-resource "aws_dynamodb_table" "wishlist_table" {
-  name           = "wishlist"
-  billing_mode   = "PAY_PER_REQUEST"
-  hash_key       = "pk"
-  range_key      = "sk"
+resource "aws_acm_certificate" "wishlist_cert" {
+  domain_name               = "wishlist.budjb.com"
+  subject_alternative_names = ["api.wishlist.budjb.com"]
+  validation_method         = "DNS"
+}
 
-  attribute {
-    name = "pk"
-    type = "S"
-  }
-
-  attribute {
-    name = "sk"
-    type = "S"
-  }
-
-  global_secondary_index {
-    name               = "wishlist_id"
-    hash_key           = "sk"
-    projection_type    = "ALL"
-  }
+data "aws_route53_zone" "budjb_com_zone" {
+  name = "budjb.com"
 }
