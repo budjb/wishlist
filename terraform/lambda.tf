@@ -58,9 +58,9 @@ resource "aws_lambda_function" "wishlist_api" {
     mode = "PassThrough"
   }
 
-  environment {
-    variables = {}
-  }
+  # environment {
+  #   variables = {}
+  # }
 }
 
 resource "aws_lambda_alias" "lambda_alias" {

@@ -37,13 +37,13 @@ data "template_file" "api_gateway_spec" {
   template = file("${path.module}/openapi.yml")
 
   vars = {
-    lambda_arn = aws_lambda_function.wishlist_api.arn
-    role_arn   = aws_iam_role.api_gateway_role.arn
+    lambda_arn = aws_lambda_function.wishlist_api.invoke_arn
+    lambda_role   = aws_iam_role.api_gateway_role.arn
   }
 }
 
 resource "aws_api_gateway_rest_api" "api_gateway" {
-  name = "wishlist"
+  name = "Wishlist API"
   body = data.template_file.api_gateway_spec.rendered
 }
 
@@ -63,13 +63,19 @@ resource "aws_api_gateway_deployment" "api_gateway_deployment" {
 resource "aws_api_gateway_domain_name" "api_gateway_custom_domain" {
   domain_name     = "api.wishlist.budjb.com"
   certificate_arn = aws_acm_certificate.wishlist_cert.arn
+  tags = {
+    Name: "Wishlist API"
+  }
+
+  depends_on = [
+    aws_acm_certificate_validation.cert
+  ]
 }
 
 resource "aws_api_gateway_base_path_mapping" "basepath" {
   api_id      = aws_api_gateway_rest_api.api_gateway.id
   stage_name  = aws_api_gateway_deployment.api_gateway_deployment.stage_name
   domain_name = aws_api_gateway_domain_name.api_gateway_custom_domain.domain_name
-  base_path   = "/"
 }
 
 resource "aws_route53_record" "custom_domain_record" {
