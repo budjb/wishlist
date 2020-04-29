@@ -19,3 +19,28 @@ td {
   line-height: 1.428571429;
   vertical-align: top;
 }
+
+.share-modal {
+  .share-button {
+    display: inline-block;
+    background: none;
+    outline: none;
+    border: 0;
+
+    font-size: 6rem;
+    font-weight: 300;
+    line-height: 1.2;
+
+    &.facebook {
+      color: #4267b2;
+    }
+
+    &.twitter {
+      color: #1da1f2;
+    }
+
+    &.email {
+      color: #ffad45;
+    }
+  }
+}

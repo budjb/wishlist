@@ -1,28 +1,15 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { Dropdown, Jumbotron, Button, Table, Modal, Alert, Form, Toast } from 'react-bootstrap';
+import { Dropdown, Jumbotron, Button, Table, Modal, Alert, Form } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlus, faEllipsisV, faSort, faShareAlt } from '@fortawesome/free-solid-svg-icons';
-import {sortableContainer, sortableElement, sortableHandle} from 'react-sortable-hoc';
-
+import { faPlus, faEllipsisV, faShareAlt, faCopy, faEnvelopeSquare } from '@fortawesome/free-solid-svg-icons';
+import { faTwitterSquare, faFacebookSquare } from '@fortawesome/free-brands-svg-icons';
 import { ListContext, ListProvider } from '../../data/ListContext';
-
+import { FacebookShareButton, TwitterShareButton, EmailShareButton } from 'react-share';
 import DeleteListModal from '../../components/DeleteListModal';
 import EditListModal from '../../components/EditListModal';
 
-import './View.css';
-
-const SortableTable = sortableContainer(({ children }) => <Table borderless>{children}</Table>);
-const SortableItemRow = sortableElement(({ idx, item, isOwner }) => {
-  return <ItemRow key={idx} index={idx} item={item} isOwner={isOwner}/>;
-});
-const SortableDragHandle = sortableHandle(() => {
-  return (
-    <span className="pr-2 cursor-move text-muted-hover">
-      <FontAwesomeIcon icon={faSort}/>
-    </span>
-  );
-});
+import './View.scss';
 
 const currencyFormatter = new Intl.NumberFormat('en-US', {
   style: 'currency',
@@ -39,6 +26,58 @@ const currencyOrString = s => {
     return s;
   }
   return currencyFormatter.format(s);
+};
+
+const ShareModal = ({ show, close }) => {
+  const context = useContext(ListContext);
+
+  if (navigator.share) {
+    if (show) {
+      navigator.share({
+        url: window.location.href,
+        title: context.list.description
+      }).then(() => close()).catch(() => close());
+    }
+    return '';
+  }
+
+  const copyUrlToClipboard = () => {
+    var dummy = document.createElement("input");
+    document.body.appendChild(dummy);
+    dummy.setAttribute('value', window.location.href);
+    dummy.select();
+    document.execCommand("copy");
+    document.body.removeChild(dummy);
+    close();
+  };
+
+  const shareUrl = 'https://wishlist.budjb.com/foo';
+  const text = 'Check out my wishlist!';
+
+  return (
+    <Modal show={show} onHide={close} className="share-modal">
+      <Modal.Header closeButton>
+        <Modal.Title>Share Wishlist...</Modal.Title>
+      </Modal.Header>
+      <Modal.Body>
+        <div className="d-flex flex-row justify-content-around mb-3">
+          <FacebookShareButton resetButtonStyle={false} url={shareUrl} quote={text} className="share-button facebook">
+            <FontAwesomeIcon icon={faFacebookSquare}/>
+          </FacebookShareButton>
+          <TwitterShareButton resetButtonStyle={false} url={shareUrl} title={text} className="share-button twitter">
+            <FontAwesomeIcon icon={faTwitterSquare}/>
+          </TwitterShareButton>
+          <EmailShareButton resetButtonStyle={false} subject={text} body={`Check out my wishlist! ${shareUrl}`} className="share-button email">
+            <FontAwesomeIcon icon={faEnvelopeSquare}/>
+          </EmailShareButton>
+        </div>
+        <div className="bg-light rounded p-1 d-flex flex-row align-items-center">
+          <div className="overflow-auto flex-grow-1" style={{fontSize: '0.75rem'}}>{window.location.href}</div>
+          <div className="px-2 text-muted-hover cursor-pointer" onClick={copyUrlToClipboard}><FontAwesomeIcon icon={faCopy}/></div>
+        </div>
+      </Modal.Body>
+    </Modal>
+  )
 };
 
 const ConfirmRemoveModal = ({ item, isShown, close }) => {
@@ -268,7 +307,6 @@ const ItemRow = ({ item, isOwner }) => {
   return (
     <tr className="bg-white">
       <td>
-        { isOwner && <SortableDragHandle/> }
         {description}
       </td>
       <td className="text-right">{currencyOrString(item.price)}</td>
@@ -317,28 +355,16 @@ const ListActions = ({ isOwner}) => {
   const [isDeleteModalShown, setIsDeleteModalShown] = useState(false);
   const [isEditModalShown, setIsEditModalShown] = useState(false);
   const [isAddItemModalShown, setIsAddItemModalShown] = useState(false);
-  const [isCopiedToastShown, setIsCopiedToastShown] = useState(false);
+  const [isShareModalShown, setIsShareModalShown] = useState(false);
 
   const context = useContext(ListContext);
 
   const list = context.list;
 
-  const copyUrlToClipboard = () => {
-      var dummy = document.createElement("input");
-      document.body.appendChild(dummy);
-      dummy.setAttribute('value', window.location.href);
-      dummy.select();
-      document.execCommand("copy");
-      document.body.removeChild(dummy);
-      setIsCopiedToastShown(true);
-  };
-
   const share = (
     <>
-      <Toast onClose={() => setIsCopiedToastShown(false)} show={isCopiedToastShown} delay={2000} autohide>
-        <Toast.Body>Link copied to clipboard!</Toast.Body>
-      </Toast>
-      <div className="cursor-pointer px-2 text-muted-hover" onClick={copyUrlToClipboard}>
+      <ShareModal show={isShareModalShown} close={() => setIsShareModalShown(false)}/>
+      <div className="cursor-pointer px-2 text-muted-hover" onClick={() => setIsShareModalShown(true)}>
         <FontAwesomeIcon icon={faShareAlt}/>
      </div>
     </>
@@ -385,16 +411,9 @@ const List = () => {
     return <EmptyList isOwner={isOwner}/>;
   }
 
-  const rows = context.items.map((it, idx) => {
-    return <SortableItemRow key={idx} index={idx} item={it} isOwner={isOwner}/>;
+  const rows = context.items.map((item, idx) => {
+    return <ItemRow key={idx} index={idx} item={item} isOwner={isOwner}/>
   });
-
-  const handleSortStart = ({ node }) => {
-    const tds = document.getElementsByClassName("SortableHelper")[0].childNodes;
-    node.childNodes.forEach(
-      (node, idx) => tds[idx].style.width = `${node.offsetWidth}px`
-    );
-  };
 
   return (
     <>
@@ -405,7 +424,7 @@ const List = () => {
         <ListActions isOwner={isOwner}/>
       </header>
 
-      <SortableTable lockAxis="y" onSortStart={handleSortStart} helperClass="SortableHelper" useDragHandle>
+      <Table borderless>
         <thead>
           <tr className="bg-secondary text-white">
             <th>Description</th>
@@ -416,7 +435,7 @@ const List = () => {
         <tbody>
           {rows}
         </tbody>
-      </SortableTable>
+      </Table>
     </> 
   )
 };

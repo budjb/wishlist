@@ -1,6 +1,19 @@
 version: 2.1
 
 commands:
+  s3sync:
+    parameters:
+      bucket:
+        type: string
+      working_directory:
+        type: string
+        default: "."
+    steps:
+      - run:
+          command: "aws s3 sync << parameters.working_directory >>/build s3://<< parameters.bucket >>/ --acl=\"public-read\" --delete --cache-control max-age=31536000,public"
+      - run:
+          command: "aws s3 cp s3://<< parameters.bucket >>/index.html s3://<< parameters.bucket >>/index.html --metadata-directive REPLACE --cache-control max-age=0,no-cache,no-store,must-revalidate --content-type text/html --acl public-read"
+
   terraform:
     description: Plan and apply a Terraform configuration
     parameters:
@@ -70,6 +83,32 @@ jobs:
           at: wishlist-api
       - terraform
 
+  deploy_ui:
+    docker:
+      - image: circleci/node:12
+    steps:
+      - checkout
+      - aws-cli/install
+      - attach_workspace:
+          at: ~/.aws
+      - restore_cache:
+          keys:
+            - ui-dependencies-{{ checksum "wishlist-ui/package.json" }}
+            - ui-dependencies-
+      - run:
+          command: yarn install
+          working_directory: wishlist-ui
+      - save_cache:
+          paths:
+            - wishlist-ui/node_modules
+          key: ui-dependencies-{{ checksum "wishlist-ui/package.json" }}
+      - run:
+          command: yarn build
+          working_directory: wishlist-ui
+      - s3sync:
+          bucket: budjb-wishlist-ui
+          working_directory: wishlist-ui
+
 workflows:
   release:
     jobs:
@@ -88,6 +127,13 @@ workflows:
           requires:
             - aws_auth
             - build_api
+          filters:
+            branches:
+              only:
+                - master
+      - deploy_ui:
+          requires:
+            - aws_auth
           filters:
             branches:
               only:
