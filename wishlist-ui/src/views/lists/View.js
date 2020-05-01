@@ -1,6 +1,6 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { Dropdown, Jumbotron, Button, Table, Modal, Alert, Form } from 'react-bootstrap';
+import { Dropdown, Jumbotron, Button, Table, Modal, Alert, Form, InputGroup } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus, faEllipsisV, faShareAlt, faCopy, faEnvelopeSquare } from '@fortawesome/free-solid-svg-icons';
 import { faTwitterSquare, faFacebookSquare } from '@fortawesome/free-brands-svg-icons';
@@ -51,7 +51,7 @@ const ShareModal = ({ show, close }) => {
     close();
   };
 
-  const shareUrl = 'https://wishlist.budjb.com/foo';
+  const shareUrl = window.location.href;
   const text = 'Check out my wishlist!';
 
   return (
@@ -71,10 +71,12 @@ const ShareModal = ({ show, close }) => {
             <FontAwesomeIcon icon={faEnvelopeSquare}/>
           </EmailShareButton>
         </div>
-        <div className="bg-light rounded p-1 d-flex flex-row align-items-center">
-          <div className="overflow-auto flex-grow-1" style={{fontSize: '0.75rem'}}>{window.location.href}</div>
-          <div className="px-2 text-muted-hover cursor-pointer" onClick={copyUrlToClipboard}><FontAwesomeIcon icon={faCopy}/></div>
-        </div>
+        <InputGroup>
+          <p className="copy-url">{shareUrl}</p>
+          <InputGroup.Append>
+            <Button variant="secondary" onClick={copyUrlToClipboard}>Copy <FontAwesomeIcon icon={faCopy}/></Button>
+          </InputGroup.Append>
+        </InputGroup>
       </Modal.Body>
     </Modal>
   )
