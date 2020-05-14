@@ -1,9 +1,11 @@
-html, body, div#root {
+html,
+body,
+div#root {
   height: 100%;
 }
 
 body {
-  background: url("/back.jpg");
+  background: url('/back.jpg');
 }
 
 .table td.fit,

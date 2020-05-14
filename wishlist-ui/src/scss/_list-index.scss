@@ -1,0 +1,25 @@
+.lists-index {
+  .list-link {
+    color: black;
+  }
+
+  .list-link:hover {
+    text-decoration: none;
+  }
+
+  .list-container {
+    margin: 0 auto;
+    background: white;
+    border-radius: 1rem;
+    padding: 1rem;
+  }
+
+  .delete-list {
+    cursor: pointer;
+    color: #6c757d;
+  }
+
+  .delete-list:hover {
+    color: black;
+  }
+}

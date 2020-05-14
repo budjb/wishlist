@@ -1,0 +1,82 @@
+div.main-container {
+  min-height: 100%;
+  max-width: 800px;
+  width: 100%;
+  margin: 0 auto;
+  background: white;
+}
+
+main {
+  position: relative;
+}
+
+.fork-me {
+  width: 3rem;
+  height: 3rem;
+  background: linear-gradient(to bottom right, #fff 0%, #fff 50%, black 50%, black 100%);
+  color: white;
+  cursor: pointer;
+}
+
+.fork-me:hover {
+  color: white;
+}
+
+.edit-button {
+  color: #999;
+  cursor: pointer;
+}
+
+.edit-button:hover {
+  color: black;
+}
+
+.edit-row-button {
+  cursor: pointer;
+}
+
+.edit-row-button.edit-confirm {
+  color: #5cb85c;
+}
+
+.edit-row-button.edit-cancel {
+  color: #292b2c;
+}
+
+.profile-button img {
+  border-radius: 100%;
+  cursor: pointer;
+  height: 2.5rem;
+}
+
+.profile-button.dropdown-toggle::after {
+  content: none;
+}
+
+.toolbar-home-link {
+  .site-logo {
+    color: #a9001a;
+  }
+
+  font-size: 1.5rem !important;
+  color: black;
+}
+
+.toolbar-home-link:hover {
+  color: inherit;
+  text-decoration: none;
+}
+
+/*
+These are necessary for the draggable, if I add it.
+
+body > tr {
+  display: table !important;
+}
+
+td {
+  padding: .75rem;
+  line-height: 1.428571429;
+  vertical-align: top;
+}
+*/
