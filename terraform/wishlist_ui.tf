@@ -6,14 +6,34 @@ locals {
 # S3 Bucket                                               #
 ###########################################################
 
+data "aws_iam_policy_document" "ui_bucket" {
+  statement {
+    actions   = ["s3:GetObject"]
+    resources = ["${aws_s3_bucket.ui_bucket.arn}/*"]
+
+    principals {
+      type        = "AWS"
+      identifiers = [aws_cloudfront_origin_access_identity.wishlist_ui.iam_arn]
+    }
+  }
+}
+
+resource "aws_s3_bucket_policy" "ui_bucket" {
+  bucket = aws_s3_bucket.ui_bucket.id
+  policy = data.aws_iam_policy_document.ui_bucket.json
+}
+
 resource "aws_s3_bucket" "ui_bucket" {
   bucket = "budjb-wishlist-ui"
-  acl    = "public-read"
+}
 
-  website {
-    index_document = "index.html"
-    error_document = "index.html"
-  }
+resource "aws_s3_bucket_public_access_block" "ui_buicket" {
+  bucket = aws_s3_bucket.ui_bucket.id
+
+  block_public_acls   = true
+  block_public_policy = true
+  ignore_public_acls = true
+  restrict_public_buckets = true
 }
 
 ###########################################################
@@ -30,24 +50,26 @@ resource "aws_acm_certificate" "wishlist_ui" {
 
 resource "aws_acm_certificate_validation" "wishlist_ui" {
   certificate_arn = aws_acm_certificate.wishlist_ui.arn
-  validation_record_fqdns = [aws_route53_record.wishlist_ui_cert_validation.fqdn]
+  validation_record_fqdns = [for record in aws_route53_record.wishlist_ui_cert_validation : record.fqdn]
 }
 
 ###########################################################
 # Cloudfront Distribution                                 #
 ###########################################################
 
+resource "aws_cloudfront_origin_access_identity" "wishlist_ui" {
+  comment = "Wishlist UI access identity"
+}
+
 resource "aws_cloudfront_distribution" "wishlist_ui" {
   origin {
-    domain_name = aws_s3_bucket.ui_bucket.website_endpoint
+    domain_name = aws_s3_bucket.ui_bucket.bucket_regional_domain_name
     origin_id   = local.ui_s3_origin_id
 
-    custom_origin_config {
-      http_port = 80
-      https_port = 443
-      origin_protocol_policy = "http-only"
-      origin_ssl_protocols = ["TLSv1.1", "TLSv1.2"]
+    s3_origin_config {
+      origin_access_identity = aws_cloudfront_origin_access_identity.wishlist_ui.cloudfront_access_identity_path
     }
+
   }
 
   enabled             = true
@@ -106,9 +128,18 @@ resource "aws_route53_record" "wishlist_ui" {
 }
 
 resource "aws_route53_record" "wishlist_ui_cert_validation" {
-  name    = aws_acm_certificate.wishlist_ui.domain_validation_options.0.resource_record_name
-  type    = aws_acm_certificate.wishlist_ui.domain_validation_options.0.resource_record_type
+  for_each = {
+    for dvo in aws_acm_certificate.wishlist_ui.domain_validation_options : dvo.domain_name => {
+      name   = dvo.resource_record_name
+      record = dvo.resource_record_value
+      type   = dvo.resource_record_type
+    }
+  }
+
+  allow_overwrite = true
+  name    = each.value.name
+  type    = each.value.type
   zone_id = data.aws_route53_zone.budjb_com_zone.zone_id
-  records = [aws_acm_certificate.wishlist_ui.domain_validation_options.0.resource_record_value]
+  records = [each.value.record]
   ttl     = 60
 }
