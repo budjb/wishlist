@@ -12,7 +12,7 @@
     "express": "^4.17.1",
     "express-jwt": "^5.3.3",
     "jwks-rsa": "^1.8.0",
-    "node-fetch": "^2.6.0",
+    "node-fetch": "^2.6.1",
     "uuid": "^7.0.3"
   },
   "scripts": {
