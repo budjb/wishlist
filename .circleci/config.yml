@@ -1,17 +1,6 @@
 version: 2.1
 
 commands:
-  s3sync:
-    parameters:
-      bucket:
-        type: string
-      working_directory:
-        type: string
-        default: "."
-    steps:
-      - run:
-          command: "aws s3 sync << parameters.working_directory >>/build s3://<< parameters.bucket >>/ --delete"
-
   terraform:
     description: Plan and apply a Terraform configuration
     parameters:
@@ -103,8 +92,8 @@ jobs:
       - run:
           command: yarn build
           working_directory: wishlist-ui
-      - s3sync:
-          bucket: budjb-wishlist-ui
+      - run:
+          command: aws s3 sync build s3://budjb-wishlist-ui/ --delete
           working_directory: wishlist-ui
 
 workflows:
