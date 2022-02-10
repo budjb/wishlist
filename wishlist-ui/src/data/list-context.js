@@ -6,7 +6,7 @@ import Loading from '../components/loading';
 import { okCheck } from '../utils/fetch';
 
 import config from '../config.json';
-import { Redirect } from 'react-router';
+import { Navigate } from 'react-router';
 
 export const ListContext = createContext();
 
@@ -190,7 +190,7 @@ export const ListProvider = ({ wishlistId, children, loadingAs }) => {
   if (loading) {
     return loadingAs ? loadingAs : <Loading />;
   } else if (redirectToRoot) {
-    return <Redirect to="/" />;
+    return <Navigate to="/" />;
   } else if (unavailable) {
     // TODO: actually make an unavailable page
     return 'The service is unavailable.';
