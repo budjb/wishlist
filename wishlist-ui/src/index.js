@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import App from './app';
 import Auth0 from './auth0';
-import * as serviceWorker from './service-worker';
+import * as serviceWorkerRegistration from './serviceWorkerRegistration';
 import config from './config.json';
 
 import './index.css';
@@ -21,4 +21,4 @@ ReactDOM.render(
   document.getElementById('root')
 );
 
-serviceWorker.register();
+serviceWorkerRegistration.unregister();
