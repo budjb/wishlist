@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import { BrowserRouter, Switch, Route, Redirect } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Auth0Context } from './auth0';
 
 import Layout from './components/layout';
@@ -19,30 +19,31 @@ const Content = () => {
     return <Loading />;
   } else if (!auth0Context.isAuthenticated) {
     return (
-      <Switch>
-        <Route exact path="/" component={Home} />
-        <Route path="/:id" component={ListView} />
-      </Switch>
+      <Routes>
+        <Route exact path="/" element={<Home />} />
+        <Route path="/:id" element={<ListView />} />
+        <Route path="*" element={<Navigate to="/" />} />
+      </Routes>
     );
   } else {
     return (
-      <Switch>
-        <Route exact path="/" component={ListIndex} />
-        <Route exact path="/:id" component={ListView} />
-      </Switch>
+      <Routes>
+        <Route exact path="/" element={<ListIndex />} />
+        <Route exact path="/:id" element={<ListView />} />
+        <Route path="*" element={<Navigate to="/" />} />
+      </Routes>
     );
   }
 };
 
-export default () => {
+const App = () => {
   return (
     <BrowserRouter>
-      <Switch>
-        <Layout>
-          <Content />
-        </Layout>
-        <Redirect to="/" />
-      </Switch>
+      <Layout>
+        <Content />
+      </Layout>
     </BrowserRouter>
   );
 };
+
+export default App;

@@ -14,7 +14,9 @@ commands:
       - run: terraform apply terraform.plan
 
 orbs:
-  aws-cli: circleci/aws-cli@0.1.13
+  aws-s3: circleci/aws-s3@3.0.0
+  aws-cli: circleci/aws-cli@2.0.6
+  terraform: circleci/terraform@3.0.1
 
 jobs:
   build_api:
@@ -43,36 +45,30 @@ jobs:
           root: wishlist-api
           paths: dist/
 
-  aws_auth:
-    executor: aws-cli/default
-    environment:
-      AWS_REGION: us-east-1
-    steps:
-      - checkout
-      - aws-cli/install
-      - aws-cli/configure:
-          aws-access-key-id: AWS_ACCESS_KEY_ID
-          aws-secret-access-key: AWS_SECRET_ACCESS_KEY
-          aws-region: AWS_REGION
-      - persist_to_workspace:
-          root: ~/.aws
-          paths:
-            - "*"
-
   terraform:
     docker:
       - image: hashicorp/terraform:0.12.24
     steps:
       - checkout
       - attach_workspace:
-          at: ~/.aws
-      - attach_workspace:
           at: wishlist-api
-      - terraform
+      - aws-cli/install
+      - aws-cli/setup:
+          aws-access-key-id: AWS_ACCESS_KEY_ID
+          aws-secret-access-key: AWS_SECRET_ACCESS_KEY
+          aws-region: AWS_REGION
+      - terraform/init:
+          backend: true
+          backend_config: bucket=wishlist-terraform-state,key=terraform.tfstate
+          path: terraform
+      - terraform/plan:
+          path: terraform
+      - terraform/apply:
+          path: terraform
 
   deploy_ui:
     docker:
-      - image: circleci/node:12
+      - image: circleci/node:16
     steps:
       - checkout
       - aws-cli/install
@@ -92,35 +88,31 @@ jobs:
       - run:
           command: yarn build
           working_directory: wishlist-ui
-      - run:
-          command: aws s3 sync build s3://budjb-wishlist-ui/ --delete
-          working_directory: wishlist-ui
+      - aws-s3/sync:
+          aws-access-key-id: AWS_ACCESS_KEY_ID
+          aws-secret-access-key: AWS_SECRET_ACCESS_KEY
+          aws-region: AWS_REGION
+          from: wishlist-ui/build
+          to: s3://budjb-wishlist-ui/
 
 workflows:
   release:
     jobs:
-      - aws_auth:
-          context: aws-personal
-          filters:
-            branches:
-              only:
-                - master
       - build_api:
           filters:
             branches:
               only:
                 - master
       - terraform:
+          context: aws-personal
           requires:
-            - aws_auth
             - build_api
           filters:
             branches:
               only:
                 - master
       - deploy_ui:
-          requires:
-            - aws_auth
+          context: aws-personal
           filters:
             branches:
               only:

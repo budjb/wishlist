@@ -5,7 +5,7 @@ div#root {
 }
 
 body {
-  background: url('/back.jpg');
+  background: url('../public/back.jpg');
 }
 
 .table td.fit,
