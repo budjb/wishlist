@@ -1,6 +1,6 @@
-import React, { useContext } from 'react';
+import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { Auth0Context } from './auth0';
+import { useAuth0 } from '@auth0/auth0-react';
 
 import Layout from './components/layout';
 import Loading from './components/loading';
@@ -13,9 +13,9 @@ import Home from './views/home';
 import './scss/main.scss';
 
 const Content = () => {
-  const auth0Context = useContext(Auth0Context);
+  const auth0Context = useAuth0();
 
-  if (auth0Context.loading) {
+  if (auth0Context.isLoading) {
     return <Loading />;
   } else if (!auth0Context.isAuthenticated) {
     return (

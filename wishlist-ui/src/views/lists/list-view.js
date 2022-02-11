@@ -537,10 +537,12 @@ const List = () => {
   );
 };
 
-export default () => {
+const ListView = () => {
   return (
     <ListProvider wishlistId={useParams().id} loadingAs={<LoadingList />}>
       <List />
     </ListProvider>
   );
 };
+
+export default ListView;

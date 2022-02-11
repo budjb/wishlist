@@ -1,8 +1,8 @@
-import React, { useContext } from 'react';
+import React from 'react';
 import { Dropdown } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSignOutAlt, faSignInAlt, faListAlt } from '@fortawesome/free-solid-svg-icons';
-import { Auth0Context } from '../auth0';
+import { useAuth0 } from '@auth0/auth0-react';
 import { Link } from 'react-router-dom';
 
 const Login = ({ handler }) => {
@@ -34,7 +34,7 @@ const UserOptions = ({ handler, user }) => {
 };
 
 const Auth = ({ context }) => {
-  if (context.loading) {
+  if (context.isLoading) {
     return '';
   } else if (!context.isAuthenticated) {
     return <Login handler={context.loginWithRedirect} />;
@@ -43,8 +43,8 @@ const Auth = ({ context }) => {
   }
 };
 
-export default () => {
-  const auth0Context = useContext(Auth0Context);
+const Toolbar = () => {
+  const auth0Context = useAuth0();
 
   return (
     <div className="d-flex flex-row align-items-center">
@@ -57,3 +57,5 @@ export default () => {
     </div>
   );
 };
+
+export default Toolbar;

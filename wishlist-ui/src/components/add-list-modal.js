@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Modal, Form, Button } from 'react-bootstrap';
 
-export default ({ isShown, close, addList }) => {
+const AddListModal = ({ isShown, close, addList }) => {
   const [validated, setValidated] = useState(false);
 
   let nameRef;
@@ -45,3 +45,5 @@ export default ({ isShown, close, addList }) => {
     </Modal>
   );
 };
+
+export default AddListModal;

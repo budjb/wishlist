@@ -37,7 +37,7 @@ const Footer = () => {
   );
 };
 
-export default ({ children }) => {
+const Layout = ({ children }) => {
   return (
     <div className="main-container d-flex flex-column">
       <header className="p-1 p-md-2">
@@ -48,3 +48,5 @@ export default ({ children }) => {
     </div>
   );
 };
+
+export default Layout;

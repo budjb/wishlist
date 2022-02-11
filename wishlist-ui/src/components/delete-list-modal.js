@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Modal, Button, Alert } from 'react-bootstrap';
 
-export default ({ list, isShown, close, deleteList }) => {
+const DeleteListModal = ({ list, isShown, close, deleteList }) => {
   const [busy, setBusy] = useState(false);
   const [errorMessage, setErrorMessage] = useState();
 
@@ -40,3 +40,5 @@ export default ({ list, isShown, close, deleteList }) => {
     </Modal>
   );
 };
+
+export default DeleteListModal;

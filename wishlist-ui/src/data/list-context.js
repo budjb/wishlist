@@ -1,5 +1,5 @@
-import React, { useState, useContext, useEffect, createContext, useCallback } from 'react';
-import { Auth0Context } from '../auth0';
+import React, { useState, useEffect, createContext, useCallback } from 'react';
+import { useAuth0 } from '@auth0/auth0-react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faFrown } from '@fortawesome/free-regular-svg-icons';
 import Loading from '../components/loading';
@@ -17,7 +17,7 @@ export const ListProvider = ({ wishlistId, children, loadingAs }) => {
   const [unavailable, setUnavailable] = useState(false);
   const [redirectToRoot, setRedirectToRoot] = useState(false);
 
-  const auth0Context = useContext(Auth0Context);
+  const auth0Context = useAuth0();
 
   /**
    * Queries the backend service for a list of wishlists associated with the logged in user.
@@ -40,7 +40,7 @@ export const ListProvider = ({ wishlistId, children, loadingAs }) => {
   }, [wishlistId]);
 
   const isCurrentUserOwner = () => {
-    if (auth0Context.loading || !auth0Context.isAuthenticated) {
+    if (auth0Context.isLoading || !auth0Context.isAuthenticated) {
       return false;
     }
     return auth0Context.user.email === list.owner;
@@ -53,7 +53,7 @@ export const ListProvider = ({ wishlistId, children, loadingAs }) => {
     data.id = id;
 
     return auth0Context
-      .getTokenSilently()
+      .getAccessTokenSilently()
       .then(token => {
         return fetch(`${config.apiBaseUrl}/wishlists/${id}`, {
           method: 'PUT',
@@ -76,7 +76,7 @@ export const ListProvider = ({ wishlistId, children, loadingAs }) => {
    */
   const deleteList = id => {
     return auth0Context
-      .getTokenSilently()
+      .getAccessTokenSilently()
       .then(token => {
         return fetch(`${config.apiBaseUrl}/wishlists/${id}`, {
           method: 'DELETE',
@@ -99,7 +99,7 @@ export const ListProvider = ({ wishlistId, children, loadingAs }) => {
    */
   const addItem = data => {
     return auth0Context
-      .getTokenSilently()
+      .getAccessTokenSilently()
       .then(token => {
         return fetch(`${config.apiBaseUrl}/wishlists/${wishlistId}/items`, {
           method: 'POST',
@@ -129,7 +129,7 @@ export const ListProvider = ({ wishlistId, children, loadingAs }) => {
    */
   const updateItem = (id, data) => {
     return auth0Context
-      .getTokenSilently()
+      .getAccessTokenSilently()
       .then(token => {
         return fetch(`${config.apiBaseUrl}/wishlists/${wishlistId}/items/${id}`, {
           method: 'PUT',
@@ -159,7 +159,7 @@ export const ListProvider = ({ wishlistId, children, loadingAs }) => {
    */
   const removeItem = id => {
     return auth0Context
-      .getTokenSilently()
+      .getAccessTokenSilently()
       .then(token => {
         return fetch(`${config.apiBaseUrl}/wishlists/${wishlistId}/items/${id}`, {
           method: 'DELETE',
@@ -176,7 +176,7 @@ export const ListProvider = ({ wishlistId, children, loadingAs }) => {
   };
 
   useEffect(() => {
-    if (!auth0Context.loading) {
+    if (!auth0Context.isLoading) {
       getList()
         .then(getItems)
         .catch(err => {
@@ -185,7 +185,7 @@ export const ListProvider = ({ wishlistId, children, loadingAs }) => {
         })
         .then(() => setLoading(false));
     }
-  }, [auth0Context.loading, auth0Context.isAuthenticated, getItems, getList]);
+  }, [auth0Context.isLoading, auth0Context.isAuthenticated, getItems, getList]);
 
   if (loading) {
     return loadingAs ? loadingAs : <Loading />;

@@ -1,11 +1,11 @@
-import React, { useContext } from 'react';
-import { Auth0Context } from '../auth0';
+import React from 'react';
+import { useAuth0 } from '@auth0/auth0-react';
 import { Button, Jumbotron } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSignInAlt } from '@fortawesome/free-solid-svg-icons';
 
-export default () => {
-  const auth0Context = useContext(Auth0Context);
+const Home = () => {
+  const auth0Context = useAuth0();
 
   return (
     <Jumbotron className="bg-white">
@@ -27,3 +27,5 @@ export default () => {
     </Jumbotron>
   );
 };
+
+export default Home;

@@ -1,5 +1,5 @@
-import React, { useState, useContext, useEffect, createContext, useCallback } from 'react';
-import { Auth0Context } from '../auth0';
+import React, { useState, useEffect, createContext, useCallback } from 'react';
+import { useAuth0 } from '@auth0/auth0-react';
 import config from '../config.json';
 
 import Loading from '../components/loading';
@@ -12,14 +12,14 @@ export const ListsProvider = ({ children, loadingAs }) => {
   const [loading, setLoading] = useState(true);
   const [unavailable, setUnavailable] = useState(false);
 
-  const auth0Context = useContext(Auth0Context);
+  const auth0Context = useAuth0();
 
   /**
    * Queries the backend service for a list of wishlists associated with the logged in user.
    */
   const getLists = useCallback(() => {
     return auth0Context
-      .getTokenSilently()
+      .getAccessTokenSilently()
       .then(token => {
         return fetch(`${config.apiBaseUrl}/wishlists`, {
           headers: {
@@ -37,7 +37,7 @@ export const ListsProvider = ({ children, loadingAs }) => {
    */
   const createList = name => {
     return auth0Context
-      .getTokenSilently()
+      .getAccessTokenSilently()
       .then(token => {
         return fetch(`${config.apiBaseUrl}/wishlists`, {
           method: 'POST',
@@ -62,7 +62,7 @@ export const ListsProvider = ({ children, loadingAs }) => {
     data.id = id;
 
     return auth0Context
-      .getTokenSilently()
+      .getAccessTokenSilently()
       .then(token => {
         return fetch(`${config.apiBaseUrl}/wishlists/${id}`, {
           method: 'PUT',
@@ -87,7 +87,7 @@ export const ListsProvider = ({ children, loadingAs }) => {
    */
   const deleteList = id => {
     return auth0Context
-      .getTokenSilently()
+      .getAccessTokenSilently()
       .then(token => {
         return fetch(`${config.apiBaseUrl}/wishlists/${id}`, {
           method: 'DELETE',
@@ -103,7 +103,7 @@ export const ListsProvider = ({ children, loadingAs }) => {
   };
 
   useEffect(() => {
-    if (!auth0Context.loading && auth0Context.isAuthenticated) {
+    if (!auth0Context.isLoading && auth0Context.isAuthenticated) {
       getLists()
         .catch(err => {
           console.error(err);

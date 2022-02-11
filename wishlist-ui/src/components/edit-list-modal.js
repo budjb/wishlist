@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Modal, Form, Button, Alert } from 'react-bootstrap';
 
-export default ({ list, isShown, close, updateList }) => {
+const EditListModal = ({ list, isShown, close, updateList }) => {
   const [validated, setValidated] = useState(false);
   const [busy, setBusy] = useState(false);
   const [errorMessage, setErrorMessage] = useState();
@@ -65,3 +65,5 @@ export default ({ list, isShown, close, updateList }) => {
     </Modal>
   );
 };
+
+export default EditListModal;

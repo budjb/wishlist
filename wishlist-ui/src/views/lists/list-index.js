@@ -132,7 +132,7 @@ const List = () => {
   );
 };
 
-export default () => {
+const ListIndex = () => {
   return (
     <ListsProvider loadingAs={<LoadingList />}>
       <ListsContext.Consumer>
@@ -143,3 +143,5 @@ export default () => {
     </ListsProvider>
   );
 };
+
+export default ListIndex;
