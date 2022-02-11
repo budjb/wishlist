@@ -46,13 +46,13 @@ jobs:
           paths: dist/
 
   terraform:
-    docker:
-      - image: hashicorp/terraform:0.12.24
+    executor: aws-cli/default
     steps:
       - checkout
       - attach_workspace:
           at: wishlist-api
-      - aws-cli/install
+      - terraform/install:
+          terraform_version: 0.12.24
       - aws-cli/setup:
           aws-access-key-id: AWS_ACCESS_KEY_ID
           aws-secret-access-key: AWS_SECRET_ACCESS_KEY
