@@ -8,7 +8,6 @@ commands:
         type: string
         default: terraform
     steps:
-      - checkout
       - run: terraform init -input=false -backend-config="bucket=wishlist-terraform-state" -backend-config="key=terraform.tfstate" << parameters.path >>
       - run: terraform plan -input=false -out terraform.plan << parameters.path >>
       - run: terraform apply terraform.plan
@@ -57,14 +56,7 @@ jobs:
           aws-access-key-id: AWS_ACCESS_KEY_ID
           aws-secret-access-key: AWS_SECRET_ACCESS_KEY
           aws-region: AWS_REGION
-      - terraform/init:
-          backend: "true"
-          backend_config: bucket=wishlist-terraform-state,key=terraform.tfstate
-          path: terraform
-      - terraform/plan:
-          path: terraform
-      - terraform/apply:
-          path: terraform
+      - terraform
 
   deploy_ui:
     docker:
