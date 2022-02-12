@@ -241,7 +241,7 @@ resource "aws_lambda_function" "wishlist_api" {
   handler                        = "lambda.handler"
   timeout                        = 28
   publish                        = true
-  runtime                        = "nodejs12.x"
+  runtime                        = "nodejs16.x"
   description                    = "Wishlist API"
 
   tracing_config {

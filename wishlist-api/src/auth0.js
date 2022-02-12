@@ -1,8 +1,8 @@
-const jwt = require('express-jwt');
-const jwks = require('jwks-rsa');
-const fetch = require('node-fetch');
+import jwt from 'express-jwt';
+import jwks from 'jwks-rsa';
+import fetch from 'node-fetch';
 
-const requireAccessToken = [
+export const requireAccessToken = [
   jwt({
     secret: jwks.expressJwtSecret({
       cache: true,
@@ -27,7 +27,3 @@ const requireAccessToken = [
       .then(() => next());
   },
 ];
-
-module.exports = {
-  requireAccessToken,
-};

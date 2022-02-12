@@ -1,14 +1,14 @@
-const AWS = require('aws-sdk');
-const { v4: uuidv4 } = require('uuid');
-const crypto = require('crypto');
-const config = require('./config.json');
+import AWS from 'aws-sdk';
+import { v4 as uuidv4 } from 'uuid';
+import crypto from 'crypto';
+import config from './config.json' assert { type: 'json' };
 
 AWS.config.update({ region: 'us-east-1' });
 const dynamodb = new AWS.DynamoDB();
 
-class AccessDeniedError extends Error {}
+export class AccessDeniedError extends Error {}
 
-const getLists = owner => {
+export const getLists = owner => {
   const params = {
     TableName: config.dynamoDbTable,
     KeyConditionExpression: 'pk = :owner AND begins_with(sk, :prefix)',
@@ -36,7 +36,7 @@ const getLists = owner => {
     });
 };
 
-const getList = id => {
+export const getList = id => {
   const params = {
     TableName: config.dynamoDbTable,
     IndexName: 'wishlist_id',
@@ -66,7 +66,7 @@ const getList = id => {
     });
 };
 
-const createList = (name, owner) => {
+export const createList = (name, owner) => {
   const id = crypto.createHash('md5').update(uuidv4()).digest('hex');
 
   const params = {
@@ -96,7 +96,7 @@ const createList = (name, owner) => {
     });
 };
 
-const updateList = (id, name, owner) => {
+export const updateList = (id, name, owner) => {
   const params = {
     TableName: config.dynamoDbTable,
     Key: {
@@ -133,7 +133,7 @@ const updateList = (id, name, owner) => {
     });
 };
 
-const deleteList = (id, owner) => {
+export const deleteList = (id, owner) => {
   const params = {
     TableName: config.dynamoDbTable,
     Key: {
@@ -175,7 +175,7 @@ const deleteList = (id, owner) => {
     });
 };
 
-const getItems = wishlistId => {
+export const getItems = wishlistId => {
   const params = {
     TableName: config.dynamoDbTable,
     KeyConditionExpression: 'pk = :prefix',
@@ -206,7 +206,7 @@ const getItems = wishlistId => {
     });
 };
 
-const updateItem = async (wishlistId, itemId, owner, description, url, price) => {
+export const updateItem = async (wishlistId, itemId, owner, description, url, price) => {
   const listData = await getList(wishlistId);
 
   if (listData.owner !== owner) {
@@ -274,7 +274,7 @@ const updateItem = async (wishlistId, itemId, owner, description, url, price) =>
     });
 };
 
-const createItem = async (wishlistId, owner, description, url, price) => {
+export const createItem = async (wishlistId, owner, description, url, price) => {
   const listData = await getList(wishlistId);
 
   if (listData.owner !== owner) {
@@ -325,7 +325,7 @@ const createItem = async (wishlistId, owner, description, url, price) => {
     });
 };
 
-const deleteItem = async (wishlistId, itemId, owner) => {
+export const deleteItem = async (wishlistId, itemId, owner) => {
   const listData = await getList(wishlistId);
 
   if (listData.owner !== owner) {
@@ -346,19 +346,4 @@ const deleteItem = async (wishlistId, itemId, owner) => {
   };
 
   return dynamodb.deleteItem(params).promise();
-};
-
-module.exports = {
-  getLists,
-  getList,
-  createList,
-  updateList,
-  deleteList,
-
-  getItems,
-  updateItem,
-  createItem,
-  deleteItem,
-
-  AccessDeniedError,
 };

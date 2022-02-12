@@ -1,7 +1,7 @@
-const express = require('express');
-const cors = require('cors');
-const awsServerlessExpressMiddleware = require('aws-serverless-express/middleware');
-const { routes } = require('./controller');
+import express from 'express';
+import cors from 'cors';
+import awsServerlessExpressMiddleware from 'aws-serverless-express/middleware.js';
+import { routes } from './controller.js';
 
 const app = ({ useAwsMiddleware = false }) => {
   const app = express();
@@ -31,4 +31,4 @@ const app = ({ useAwsMiddleware = false }) => {
   return app;
 };
 
-module.exports = app;
+export default app;

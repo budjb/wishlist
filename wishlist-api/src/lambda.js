@@ -1,6 +1,9 @@
-const { createServer, proxy } = require('aws-serverless-express');
+import { createServer, proxy } from 'aws-serverless-express';
+import app from './app.js';
 
-exports.handler = (event, context) => {
-  const app = require('./app')({ useAwsMiddleware: true });
-  proxy(createServer(app), event, context);
+const handler = (event, context) => {
+  const instance = app({ useAwsMiddleware: true });
+  proxy(createServer(instance), event, context);
 };
+
+export default { handler };

@@ -3,20 +3,21 @@
   "version": "1.0.0",
   "main": "src/index.js",
   "license": "MIT",
+  "type": "module",
   "dependencies": {
     "@hapi/joi": "^17.1.1",
-    "auth0": "^2.27.1",
-    "aws-sdk": "^2.662.0",
-    "aws-serverless-express": "^3.3.8",
+    "auth0": "^2.40.0",
+    "aws-sdk": "^2.1073.0",
+    "aws-serverless-express": "^3.4.0",
     "cors": "^2.8.5",
-    "express": "^4.17.1",
-    "express-jwt": "^6.0.0",
-    "jwks-rsa": "^1.8.0",
-    "node-fetch": "^3.1.1",
-    "uuid": "^7.0.3"
+    "express": "^4.17.2",
+    "express-jwt": "^6.1.0",
+    "jwks-rsa": "^2.0.5",
+    "node-fetch": "^3.2.0",
+    "uuid": "^8.3.2"
   },
   "scripts": {
-    "start": "nodemon src/index.js",
+    "start": "nodemon --experimental-json-modules src/index.js",
     "build": "rm -rf build/ && mkdir build && cp -R src/* build/ && yarn install --production --modules-folder build/node_modules",
     "package": "rm -rf dist/ && mkdir dist && yarn build && (cd build && zip -qr9 ../dist/lambda.zip .)",
     "clean": "rm -rf dist/ build/",
@@ -24,7 +25,7 @@
     "format-check": "prettier --check \"**/*.+(js|jsx|json|css)\""
   },
   "devDependencies": {
-    "nodemon": "^2.0.3",
-    "prettier": "^2.0.5"
+    "nodemon": "^2.0.15",
+    "prettier": "^2.5.1"
   }
 }

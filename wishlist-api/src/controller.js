@@ -1,7 +1,7 @@
-const express = require('express');
-const { requireAccessToken } = require('./auth0');
-const Joi = require('@hapi/joi');
-const client = require('./client');
+import express from 'express';
+import { requireAccessToken } from './auth0.js';
+import Joi from '@hapi/joi';
+import * as client from './client.js';
 
 /**
  * Wishlist schema.
@@ -243,7 +243,7 @@ const createItem = (req, res) => {
     });
 };
 
-const routes = () => {
+export const routes = () => {
   const router = new express.Router();
 
   router.use(express.json());
@@ -259,8 +259,4 @@ const routes = () => {
   router.post('/wishlists/:wishlistId/items', requireAccessToken, createItem);
 
   return router;
-};
-
-module.exports = {
-  routes,
 };
