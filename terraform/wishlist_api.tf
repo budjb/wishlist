@@ -1,5 +1,5 @@
 locals {
-  lambda_dist_path = "${path.module}/../wishlist-api-python/build/dist/lambda.zip"
+  lambda_dist_path = "${path.module}/../wishlist-api/build/dist/lambda.zip"
 }
 
 ###########################################################
