@@ -8,9 +8,15 @@ commands:
         type: string
         default: terraform
     steps:
-      - run: terraform init -input=false -backend-config="bucket=wishlist-terraform-state" -backend-config="key=terraform.tfstate" << parameters.path >>
-      - run: terraform plan -input=false -out terraform.plan << parameters.path >>
-      - run: terraform apply terraform.plan
+      - run:
+          name: Initialize Terraform
+          command: terraform init -input=false -backend-config="bucket=wishlist-terraform-state" -backend-config="key=terraform.tfstate" << parameters.path >>
+      - run:
+          name: Create Terraform Plan
+          command: terraform plan -input=false -out terraform.plan << parameters.path >>
+      - run:
+          name: Apply Terraform Plan
+          command: terraform apply terraform.plan
 
 orbs:
   aws-s3: circleci/aws-s3@3.0.0
@@ -24,13 +30,15 @@ jobs:
     steps:
       - checkout
       - run:
+          name: Install Python Dependencies
           command: pip install -r dev-requirements.txt
-          working_directory: wishlist-api-python
+          working_directory: wishlist-api
       - run:
+          name: Create Lambda Python Package
           command: invoke package
-          working_directory: wishlist-api-python
+          working_directory: wishlist-api
       - persist_to_workspace:
-          root: wishlist-api-python
+          root: wishlist-api
           paths: build/dist/
 
   terraform:
@@ -38,7 +46,7 @@ jobs:
     steps:
       - checkout
       - attach_workspace:
-          at: wishlist-api-python
+          at: wishlist-api
       - terraform/install:
           terraform_version: 0.12.24
       - aws-cli/setup:
@@ -60,6 +68,7 @@ jobs:
             - ui-dependencies-{{ checksum "wishlist-ui/package.json" }}
             - ui-dependencies-
       - run:
+          name: Install Node.js Dependencies
           command: yarn install
           working_directory: wishlist-ui
       - save_cache:
@@ -67,6 +76,7 @@ jobs:
             - wishlist-ui/node_modules
           key: ui-dependencies-{{ checksum "wishlist-ui/package.json" }}
       - run:
+          name: Build React App
           command: yarn build
           working_directory: wishlist-ui
       - aws-s3/sync:
