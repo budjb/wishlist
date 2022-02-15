@@ -1,5 +1,5 @@
 locals {
-  lambda_dist_path = "${path.module}/../wishlist-api/dist/lambda.zip"
+  lambda_dist_path = "${path.module}/../wishlist-api-python/build/dist/lambda.zip"
 }
 
 ###########################################################
@@ -7,16 +7,16 @@ locals {
 ###########################################################
 
 resource "aws_acm_certificate" "wishlist_api" {
-  domain_name               = "api.wishlist.budjb.com"
-  validation_method         = "DNS"
+  domain_name       = "api.wishlist.budjb.com"
+  validation_method = "DNS"
 
   tags = {
-    Name: "Wishlist API"
+    Name : "Wishlist API"
   }
 }
 
 resource "aws_acm_certificate_validation" "wishlist_api" {
-  certificate_arn = aws_acm_certificate.wishlist_api.arn
+  certificate_arn         = aws_acm_certificate.wishlist_api.arn
   validation_record_fqdns = [for record in aws_route53_record.wishlist_api_cert_validation : record.fqdn]
 }
 
@@ -34,11 +34,11 @@ resource "aws_route53_record" "wishlist_api_cert_validation" {
   }
 
   allow_overwrite = true
-  name    = each.value.name
-  type    = each.value.type
-  zone_id = data.aws_route53_zone.budjb_com_zone.zone_id
-  records = [each.value.record]
-  ttl     = 60
+  name            = each.value.name
+  type            = each.value.type
+  zone_id         = data.aws_route53_zone.budjb_com_zone.zone_id
+  records         = [each.value.record]
+  ttl             = 60
 }
 
 resource "aws_route53_record" "api_domain_record" {
@@ -123,8 +123,8 @@ data "template_file" "api_gateway_spec" {
   template = file("${path.module}/openapi.yml")
 
   vars = {
-    lambda_arn = aws_lambda_function.wishlist_api.invoke_arn
-    lambda_role   = aws_iam_role.api_gateway_role.arn
+    lambda_arn  = aws_lambda_function.wishlist_api.invoke_arn
+    lambda_role = aws_iam_role.api_gateway_role.arn
   }
 }
 
@@ -150,7 +150,7 @@ resource "aws_api_gateway_domain_name" "api_gateway_custom_domain" {
   domain_name     = "api.wishlist.budjb.com"
   certificate_arn = aws_acm_certificate.wishlist_api.arn
   tags = {
-    Name: "Wishlist API"
+    Name : "Wishlist API"
   }
 
   depends_on = [
@@ -234,15 +234,15 @@ resource "aws_iam_role_policy" "lambda_policy" {
 }
 
 resource "aws_lambda_function" "wishlist_api" {
-  function_name                  = "wishlist-api"
-  filename                       = local.lambda_dist_path
-  source_code_hash               = filebase64sha256(local.lambda_dist_path)
-  role                           = aws_iam_role.wishlist_api_role.arn
-  handler                        = "lambda.handler"
-  timeout                        = 28
-  publish                        = true
-  runtime                        = "nodejs16.x"
-  description                    = "Wishlist API"
+  function_name    = "wishlist-api"
+  filename         = local.lambda_dist_path
+  source_code_hash = filebase64sha256(local.lambda_dist_path)
+  role             = aws_iam_role.wishlist_api_role.arn
+  handler          = "lambda.lambda_handler"
+  timeout          = 28
+  publish          = true
+  runtime          = "python3.8"
+  description      = "Wishlist API"
 
   tracing_config {
     mode = "PassThrough"

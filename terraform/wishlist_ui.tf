@@ -30,9 +30,9 @@ resource "aws_s3_bucket" "ui_bucket" {
 resource "aws_s3_bucket_public_access_block" "ui_buicket" {
   bucket = aws_s3_bucket.ui_bucket.id
 
-  block_public_acls   = true
-  block_public_policy = true
-  ignore_public_acls = true
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
   restrict_public_buckets = true
 }
 
@@ -41,15 +41,15 @@ resource "aws_s3_bucket_public_access_block" "ui_buicket" {
 ###########################################################
 
 resource "aws_acm_certificate" "wishlist_ui" {
-  domain_name               = "wishlist.budjb.com"
-  validation_method         = "DNS"
+  domain_name       = "wishlist.budjb.com"
+  validation_method = "DNS"
   tags = {
-    Name: "Wishlist UI"
+    Name : "Wishlist UI"
   }
 }
 
 resource "aws_acm_certificate_validation" "wishlist_ui" {
-  certificate_arn = aws_acm_certificate.wishlist_ui.arn
+  certificate_arn         = aws_acm_certificate.wishlist_ui.arn
   validation_record_fqdns = [for record in aws_route53_record.wishlist_ui_cert_validation : record.fqdn]
 }
 
@@ -101,13 +101,19 @@ resource "aws_cloudfront_distribution" "wishlist_ui" {
 
   viewer_certificate {
     acm_certificate_arn = aws_acm_certificate.wishlist_ui.arn
-    ssl_support_method = "sni-only"
+    ssl_support_method  = "sni-only"
   }
 
   restrictions {
     geo_restriction {
       restriction_type = "none"
     }
+  }
+
+  custom_error_response {
+    error_code         = 403
+    response_code      = 200
+    response_page_path = "/index.html"
   }
 }
 
@@ -137,9 +143,9 @@ resource "aws_route53_record" "wishlist_ui_cert_validation" {
   }
 
   allow_overwrite = true
-  name    = each.value.name
-  type    = each.value.type
-  zone_id = data.aws_route53_zone.budjb_com_zone.zone_id
-  records = [each.value.record]
-  ttl     = 60
+  name            = each.value.name
+  type            = each.value.type
+  zone_id         = data.aws_route53_zone.budjb_com_zone.zone_id
+  records         = [each.value.record]
+  ttl             = 60
 }

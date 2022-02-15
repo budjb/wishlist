@@ -20,36 +20,25 @@ orbs:
 jobs:
   build_api:
     docker:
-      - image: circleci/node:16
+      - image: circleci/python:3.8
     steps:
       - checkout
-      - restore_cache:
-          keys:
-            - wishlist-api-dependencies-{{ checksum "wishlist-api/package.json" }}
-            - wishlist-api-dependencies-
       - run:
-          command: yarn install
-          working_directory: wishlist-api
-      - save_cache:
-          paths:
-            - node_modules
-          key: wishlist-api-dependencies-{{ checksum "wishlist-api/package.json" }}
+          command: pip install -r dev-requirements.txt
+          working_directory: wishlist-api-python
       - run:
-          command: yarn format-check
-          working_directory: wishlist-api
-      - run:
-          command: yarn package
-          working_directory: wishlist-api
+          command: invoke package
+          working_directory: wishlist-api-python
       - persist_to_workspace:
-          root: wishlist-api
-          paths: dist/
+          root: wishlist-api-python
+          paths: build/dist/
 
   terraform:
     executor: aws-cli/default
     steps:
       - checkout
       - attach_workspace:
-          at: wishlist-api
+          at: wishlist-api-python
       - terraform/install:
           terraform_version: 0.12.24
       - aws-cli/setup:
