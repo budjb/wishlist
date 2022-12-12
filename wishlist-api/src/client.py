@@ -179,7 +179,7 @@ def update_item(
         updates["url"] = {"Action": "DELETE"}
 
     if price and len(price):
-        updates["price"] = {"Action": "PUT", "Value": {"S": url}}
+        updates["price"] = {"Action": "PUT", "Value": {"S": price}}
     else:
         updates["price"] = {"Action": "DELETE"}
 
