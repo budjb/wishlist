@@ -1,5 +1,5 @@
 import React, { useState, useContext } from 'react';
-import { Jumbotron, Button, Dropdown, ListGroup } from 'react-bootstrap';
+import { Button, Dropdown, ListGroup } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEllipsisV, faPlus } from '@fortawesome/free-solid-svg-icons';
 
@@ -15,12 +15,12 @@ const GettingStarted = () => {
   const context = useContext(ListsContext);
 
   return (
-    <Jumbotron>
+    <div className="jumbotron">
       <AddListModal isShown={isAddModalShown} close={() => setIsAddModalShown(false)} addList={context.createList} />
       <h1>Get Started</h1>
       <p>You don't have any wishlists yet! Click the button below to get started and create your first wishlist.</p>
       <Button onClick={() => setIsAddModalShown(true)}>Get Started</Button>
-    </Jumbotron>
+    </div>
   );
 };
 

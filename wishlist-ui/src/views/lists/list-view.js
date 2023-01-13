@@ -1,6 +1,6 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { Dropdown, Jumbotron, Button, Table, Modal, Alert, Form, InputGroup } from 'react-bootstrap';
+import { Dropdown, Button, Table, Modal, Alert, Form, InputGroup } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus, faEllipsisV, faShareAlt, faCopy, faEnvelopeSquare } from '@fortawesome/free-solid-svg-icons';
 import { faTwitterSquare, faFacebookSquare } from '@fortawesome/free-brands-svg-icons';
@@ -355,13 +355,13 @@ const EmptyList = ({ isOwner }) => {
 
   if (!isOwner) {
     return (
-      <Jumbotron>
+      <div className="jumbotron">
         <h1>Wish list is empty!</h1>
         <p className="m0">
           It looks like whoever created this wish list has all they could ever want! That, or they just haven't added
           anything to it. Probably the latter, but if not, maybe you should send them <em>your</em> wish list!
         </p>
-      </Jumbotron>
+      </div>
     );
   }
   return (
@@ -370,12 +370,12 @@ const EmptyList = ({ isOwner }) => {
         <h2 className="flex-grow-1">{context.list.name}</h2>
         {isOwner && <ListActions />}
       </header>
-      <Jumbotron>
+      <div className="jumbotron">
         <AddItemModal isShown={isAddModalShown} close={() => setIsAddModalShown(false)} />
         <h1>Get Started</h1>
         <p>You don't have any items in your wishlist yet. Get started by adding an item!</p>
         <Button onClick={() => setIsAddModalShown(true)}>Add An Item</Button>
-      </Jumbotron>
+      </div>
     </>
   );
 };

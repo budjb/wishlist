@@ -57,7 +57,7 @@ jobs:
 
   deploy_ui:
     docker:
-      - image: circleci/node:16
+      - image: circleci/node:19
     steps:
       - checkout
       - aws-cli/install
