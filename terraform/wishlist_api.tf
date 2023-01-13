@@ -1,5 +1,10 @@
 locals {
   lambda_dist_path = "${path.module}/../wishlist-api/build/dist/lambda.zip"
+  api_gateway_spec = templatefile("${path.module}/openapi.yml", {
+    lambda_arn  = aws_lambda_function.wishlist_api.invoke_arn,
+    lambda_role = aws_iam_role.api_gateway_role.arn
+    }
+  )
 }
 
 ###########################################################
@@ -119,18 +124,9 @@ resource "aws_iam_role_policy" "api_gateway_lambda_policy" {
   policy = data.aws_iam_policy_document.wishlist_api_invoke_lambda.json
 }
 
-data "template_file" "api_gateway_spec" {
-  template = file("${path.module}/openapi.yml")
-
-  vars = {
-    lambda_arn  = aws_lambda_function.wishlist_api.invoke_arn
-    lambda_role = aws_iam_role.api_gateway_role.arn
-  }
-}
-
 resource "aws_api_gateway_rest_api" "api_gateway" {
   name = "Wishlist API"
-  body = data.template_file.api_gateway_spec.rendered
+  body = local.api_gateway_spec
 }
 
 resource "aws_api_gateway_deployment" "api_gateway_deployment" {
@@ -138,7 +134,7 @@ resource "aws_api_gateway_deployment" "api_gateway_deployment" {
   stage_name  = "release"
 
   variables = {
-    "version" = md5(data.template_file.api_gateway_spec.rendered)
+    "version" = md5(local.api_gateway_spec)
   }
 
   lifecycle {
