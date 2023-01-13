@@ -3,4 +3,4 @@ black
 
 -r requirements.txt
 
-pyopenssl==22.0.0
+pyopenssl==23.0.0
