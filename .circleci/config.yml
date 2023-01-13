@@ -30,6 +30,9 @@ jobs:
     steps:
       - checkout
       - run:
+          name: Update apt
+          command: apt-get update
+      - run:
           name: Install zip
           command: apt-get install -y zip
       - run:
