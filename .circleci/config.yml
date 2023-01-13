@@ -30,6 +30,9 @@ jobs:
     steps:
       - checkout
       - run:
+          name: Install zip
+          command: apt-get install -y zip
+      - run:
           name: Install Python Dependencies
           command: pip install -r dev-requirements.txt
           working_directory: wishlist-api
