@@ -10,6 +10,13 @@ main {
   position: relative;
 }
 
+.jumbotron {
+  padding: 2rem 1rem;
+  margin-bottom: 2rem;
+  background-color: var(--bs-light);
+  border-radius: .3rem;
+}
+
 .fork-me {
   width: 3rem;
   height: 3rem;

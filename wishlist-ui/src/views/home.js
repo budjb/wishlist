@@ -1,6 +1,6 @@
 import React from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
-import { Button, Jumbotron } from 'react-bootstrap';
+import { Button } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSignInAlt } from '@fortawesome/free-solid-svg-icons';
 
@@ -8,7 +8,7 @@ const Home = () => {
   const auth0Context = useAuth0();
 
   return (
-    <Jumbotron className="bg-white">
+    <div className="jumbotron bg-white">
       <h1>Welcome to Wishlist</h1>
       <p>Wishlist gives you a tool to help track and share the things you want!</p>
 
@@ -24,7 +24,7 @@ const Home = () => {
           Sign In <FontAwesomeIcon icon={faSignInAlt} />
         </Button>
       </p>
-    </Jumbotron>
+    </div>
   );
 };
 
