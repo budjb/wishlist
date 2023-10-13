@@ -8,12 +8,12 @@ updates:
   - package-ecosystem: "yarn" # See documentation for possible values
     directory: "/wishlist-ui" # Location of package manifests
     schedule:
-      interval: "daily"
+      interval: "weekly"
   - package-ecosystem: "pip" # See documentation for possible values
     directory: "/wishlist-api" # Location of package manifests
     schedule:
-      interval: "daily"
+      interval: "weekly"
   - package-ecosystem: "Terraform" # See documentation for possible values
     directory: "/terraform" # Location of package manifests
     schedule:
-      interval: "daily"
+      interval: "weekly"
